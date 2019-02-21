@@ -384,14 +384,16 @@ def main():
             except PanDeviceError as e:
                 module.fail_json(msg='Failed "present" create: {0}'.format(e))
         try:
-            changed |= set_zone(con, eth, zone_name, zones)
-            changed |= set_virtual_router(con, eth, vr_name, routers)
+            if mode not 'ha':
+                changed |= set_zone(con, eth, zone_name, zones)
+                changed |= set_virtual_router(con, eth, vr_name, routers)
         except PanDeviceError as e:
             module.fail_json(msg='Failed zone/vr assignment: {0}'.format(e))
     elif state == 'absent':
         try:
-            changed |= set_zone(con, eth, None, zones)
-            changed |= set_virtual_router(con, eth, None, routers)
+            if mode not 'ha':
+                changed |= set_zone(con, eth, None, zones)
+                changed |= set_virtual_router(con, eth, None, routers)
         except PanDeviceError as e:
             module.fail_json(msg='Failed "absent" zone/vr cleanup: {0}'.format(e))
             changed = True
@@ -407,8 +409,9 @@ def main():
 
         try:
             con.organize_into_vsys()
-            set_zone(con, eth, None, zones)
-            set_virtual_router(con, eth, None, routers)
+            if mode not 'ha':
+                set_zone(con, eth, None, zones)
+                set_virtual_router(con, eth, None, routers)
             eth.delete()
             changed = True
         except (PanDeviceError, ValueError):
@@ -422,8 +425,9 @@ def main():
         # Create the interface.
         try:
             eth.create()
-            set_zone(con, eth, zone_name, zones)
-            set_virtual_router(con, eth, vr_name, routers)
+            if mode not 'ha':
+                set_zone(con, eth, zone_name, zones)
+                set_virtual_router(con, eth, vr_name, routers)
             changed = True
         except (PanDeviceError, ValueError):
             e = get_exception()
@@ -456,8 +460,9 @@ def main():
         # Update the interface.
         try:
             eth.apply()
-            set_zone(con, eth, zone_name, zones)
-            set_virtual_router(con, eth, vr_name, routers)
+            if mode not 'ha':
+                set_zone(con, eth, zone_name, zones)
+                set_virtual_router(con, eth, vr_name, routers)
             changed = True
         except (PanDeviceError, ValueError):
             e = get_exception()
